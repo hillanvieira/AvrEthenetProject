@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Main Page - Universal Control</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="BOOTSTRP.CSS" rel="stylesheet" type="text/css">
+    <script src="JQUERY.JS"></script>
+    <style>
+        /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
+        
+        .row.content {
+            height: 1500px
+        }
+        /* Set gray background color and 100% height */
+        
+        .sidenav {
+            background-color: #f1f1f1;
+            height: 100%;
+        }
+        /* Set black background color, white text and some padding */
+        
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+        
+        .termometro-in {
+            background: #ffffff;
+            height: 200px;
+            width: 20px;
+            position: absolute;
+        }
+        
+        .termometro-out {
+            background: linear-gradient(0deg, #0066cc, #ffcc00, #ff3300);
+            height: 200px;
+            width: 20px;
+            position: absolute;
+            box-shadow: 2px 2px 1px grey;
+            border-radius: 25px;
+        }
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        
+        @media screen and (max-width: 767px) {
+            .sidenav {
+                height: auto;
+                padding: 15px;
+            }
+            .row.content {
+                height: auto;
+            }
+        }
+    </style>
+
+    <script>
+
+$(document).ready(function(){
+
+var obj = "";
+var status = "";
+var ajaxcomplete = 0;
+
+window.termometro = function(x){
+var tempgrade = (x * -3.33) + 200;
+return tempgrade;
+}
+
+window.buttonStatus = function(){
+
+$("#temperatura").text(obj.systens[3].temperature);
+$("#termometro").animate({height: termometro(obj.systens[3].temperature)+'px'}, "slow");
+
+if($("#system1").text() != obj.systens[0].system){
+$("#system1").removeClass("btn-warning");
+$("#system1").text(obj.systens[0].system);
+if($("#system1").text() == "ON"){  
+$("#system1").removeClass("btn-danger");
+$("#system1").addClass("btn-success");
+}
+else{
+$("#system1").removeClass("btn-success");
+$("#system1").addClass("btn-danger");
+}
+}
+
+if($("#system2").text() != obj.systens[1].system){
+$("#system2").removeClass("btn-warning");
+$("#system2").text(obj.systens[1].system);
+if($("#system2").text() == "ON"){
+$("#system2").removeClass("btn-danger");
+$("#system2").addClass("btn-success");
+}
+else{
+$("#system2").removeClass("btn-success");
+$("#system2").addClass("btn-danger");
+}
+}
+
+if($("#system3").text() != obj.systens[2].system){
+$("#system3").removeClass("btn-warning");
+$("#system3").text(obj.systens[2].system);
+if($("#system3").text() == "ON"){
+$("#system3").removeClass("btn-danger");
+$("#system3").addClass("btn-success");
+}
+else{
+$("#system3").removeClass("btn-success");
+$("#system3").addClass("btn-danger");
+}
+}
+
+}
+
+
+
+window.termometro = function(x){
+var tempgrade = (x * -4.16) + 250;
+return tempgrade;
+}
+
+
+window.refreshRequest = function(){
+
+$.get("SYSTATUS.JSON", function(data, status){
+obj = JSON.parse(data);
+if(status = "success"){
+buttonStatus();
+ajaxcomplete = 0;
+}
+    });
+
+if(ajaxcomplete == 0){
+  ajaxcomplete == 1;
+setTimeout(function(){refreshRequest();}, 15000);
+}
+
+}
+
+
+
+window.getStatus = function(){
+$.get("SYSTATUS.JSON", function(data, status){
+obj = JSON.parse(data);
+if(status = "success"){
+buttonStatus();
+}
+    });
+}
+
+window.getSettings = function(){
+$.get("SETTINGS.JSON", function(data, status){
+objsettings = JSON.parse(data);
+if(status = "success"){
+
+$("#IP").val(objsettings.settings[0].ip_1+"."+objsettings.settings[0].ip_2+"."+objsettings.settings[0].ip_3+"."+objsettings.settings[0].ip_4);
+$("#GATEWAY").val(objsettings.settings[0].gateway_1+"."+objsettings.settings[0].gateway_2+"."+objsettings.settings[0].gateway_3+"."+objsettings.settings[0].gateway_4);
+$("#Netmask").val(objsettings.settings[0].submask_1+"."+objsettings.settings[0].submask_2+"."+objsettings.settings[0].submask_3+"."+objsettings.settings[0].submask_4);
+$("#User").val(objsettings.settings[0].user);
+$("#Password").val(objsettings.settings[0].password);
+}
+    });
+}
+
+window.isValidIp = function(ipaddress) {
+    var str = ipaddress;
+
+    var patt = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/;
+    var result = patt.test(str);
+
+   return result;
+}
+
+window.isValidUser = function(user) {
+    var str = user;
+
+    var patt = /^[a-z0-9_-]{3,8}$/;
+    var result = patt.test(str);
+
+   return result;
+}
+
+window.isValidPassword = function(password) {
+    var str = password;
+
+    var patt = /^[a-z0-9_-]{5,8}$/;
+    var result = patt.test(str);
+
+   return result;
+}
+
+$("#sendsettings").click(function(){
+    
+if( isValidIp($("#IP").val()) && isValidIp($("#GATEWAY").val()) && isValidIp($("#Netmask").val()) && isValidUser($("#User").val()) && isValidPassword($("#Password").val())){
+
+var str =  $("#IP").val();
+var arr = str.split(".");
+
+var ip_1 = arr[0];
+var ip_2 = arr[1];
+var ip_3 = arr[2];
+var ip_4 = arr[3];
+
+str = $("#GATEWAY").val();
+var arr = str.split(".");
+
+gateway_1 = arr[0];
+gateway_2 = arr[1];
+gateway_3 = arr[2];
+gateway_4 = arr[3];
+
+str = $("#Netmask").val();
+var arr = str.split(".");
+
+submask_1 = arr[0];
+submask_2 = arr[1];
+submask_3 = arr[2];
+submask_4 = arr[3];
+
+
+$.post("/SETCONFIG",
+    {
+        ip_1 : ip_1,
+        ip_2 : ip_2,
+        ip_3 : ip_3,
+        ip_4 : ip_4,
+        gateway_1 : gateway_1,
+        gateway_2 : gateway_2,
+        gateway_3 : gateway_3,
+        gateway_4 : gateway_4,
+        submask_1 : submask_1,
+        submask_2 : submask_2,
+        submask_3 : submask_3,
+        submask_4 : submask_4,
+        user : $("#User").val(),
+        password : $("#Password").val(),
+        end : "end"
+
+    });
+
+     setTimeout(function(){goToURL();}, 5000);
+     alert("Não mexa até que a pagina se reinicie, não desconecte e nem retire o sistema da tomada!");
+     
+}else{
+
+if(isValidUser($("#User").val()) && isValidPassword($("#Password").val())){
+
+     alert("um dos endereços está incorreto");
+
+}
+
+     alert("nome de usuario deve ter de 3 à 8 caracteres e o Password de 5 à 8 caracteres");
+
+}
+
+
+   });
+
+window.setCookie = function(cname, cvalue) {
+    document.cookie = cname + "=" + cvalue + ";" + ";path=/";
+} 
+
+window.checkCookie = function(cname) {
+    var user=getCookie(cname);
+       // alert("cookie = " + user);
+}
+ 
+window.getCookie = function(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+window.goToURL = function() {
+      location.href = "/";
+    }
+
+ $("#logout").click(function(){
+        setCookie("keyid","");
+        checkCookie("keyid");
+        goToURL();
+    });
+
+
+$("#system1").click(function(){
+
+if(obj.systens[0].system == "ON"){
+status = "OFF"
+}else{
+status = "ON"
+}
+
+$.post("/",
+    {
+        system1 : status
+    });
+
+setTimeout(function(){ getStatus();}, 5);
+  
+
+});
+
+$("#system2").click(function(){
+
+if(obj.systens[1].system == "ON"){
+status = "OFF"
+}else{
+status = "ON"
+}
+
+$.post("/",
+    {
+        system2 : status
+    });
+
+  setTimeout(function(){ getStatus();}, 5);
+
+});
+
+$("#system3").click(function(){
+
+if(obj.systens[2].system == "ON"){
+status = "OFF"
+}else{
+status = "ON"
+}
+
+$.post("/",
+    {
+        system3 : status
+    });
+
+   setTimeout(function(){ getStatus();}, 5);
+
+});
+
+
+getStatus();
+getSettings();
+
+ setTimeout(function(){refreshRequest();}, 1500);
+
+}); 
+
+</script>
+</head>
+
+<body>
+    <nav class="navbar navbar-default navbar-static-top" style="margin-bottom:0px" role="navigation">
+        <a class="navbar-brand">ATMega328P (Mini Web Server)</a>
+        <ul class="nav navbar-nav">
+            <li>
+                <a id="logout" href="#">Logout</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="container-fluid">
+        <div class="row content">
+            <div class="col-sm-3 sidenav">
+                <h4>System 1</h4>
+                <button id="system1" type="button" class="btn btn-large btn-block btn-warning" style="height:60px">Loading..</button>
+                <h4>System 2</h4>
+                <button id="system2" type="button" class="btn btn-large btn-block btn-warning" style="height:60px">Loading..</button>
+                <h4>System 3</h4>
+                <button id="system3" type="button" class="btn btn-large btn-block btn-warning" style="height:60px">Loading..</button>
+            </div>
+            <div class="col-xs-9 col-sm-9">
+                <div class="col-xs-1 col-sm-1" style="height:230px; padding-top:10px">
+                    <div class="termometro-out">
+                        <div id="termometro" class="termometro-in"></div>
+                    </div>
+                </div>
+                <div class="col-xs-8 col-sm-8">
+                    <div class="page-header">
+                        <h1>Temperatura do sistema <small id="temperatura">Loading...</small><small><sup>o</sup>C</small></h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-9 col-sm-9">
+                <div style="height:1px; background: gray"></div>
+            </div>
+            <div class="col-xs-9 col-sm-9">
+                <div class="well" style="margin-top: 50px">
+
+                    <h4>configurações de rede e senha</h4>
+                    <form>
+                        <div class="form-group">
+                            <label for="IP">IP:</label>
+                            <input type="text" class="form-control" id="IP" placeholder="IP">
+                        </div>
+                        <div class="form-group">
+                            <label for="GATEWAY">GATEWAY:</label>
+                            <input type="text" class="form-control" id="GATEWAY" placeholder="GATEWAY">
+                        </div>
+                        <div class="form-group">
+                            <label for="Netmask">Netmask:</label>
+                            <input type="text" class="form-control" id="Netmask" placeholder="Netmask">
+                        </div>
+                        <div class="form-group">
+                            <label for="User">User:</label>
+                            <input type="text" class="form-control" id="User" placeholder="User">
+                        </div>
+                        <div class="form-group">
+                            <label for="Password">Password:</label>
+                            <input type="password" class="form-control" id="Password" placeholder="Password">
+                        </div>
+                    </form>
+                    <button id="sendsettings" class="btn btn-default">save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="container-fluid">
+        <p>ATMega328P (Mini Web Server) Hillan Projects</p>
+    </footer>
+</body>
+
+</html>

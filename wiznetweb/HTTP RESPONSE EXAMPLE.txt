@@ -1,0 +1,90 @@
+
+// Create the HTTP Response	Header
+
+/*
+char * strcpy_P ( char * destination,PSTR( const char * source ));
+
+
+ Copies the C string pointed by source into the array pointed by destination,
+including the terminating null character (and stopping at that point).
+
+Source: C string to be copied
+
+Destination: Pointer to the destination array where the content is to be copied.
+
+To avoid overflows, the size of the array pointed by destination shall be long enough
+to contain the same C string as source (including the terminating null character),
+and should not overlap in memory with source.
+ */
+
+/* PSTR("string") = ((const PROGMEM char *)("string"))
+PROGMEM serve para não carregar uma variavel na memória RAM assim poupando a mesma,
+utíl para quando essa variavel não muda nunca. Faz o programa ler a variavel direto na memória flash.
+EX: const char texto[] PROGMEM = "Texto."; 
+
+buf = buf[MAX_BUF] and MAX_BUF = 512
+*/
+
+strcpy_P((char *)ETHBUFFER,PSTR("HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n"));
+
+/*
+char * strcat_P ( char * destination,PSTR( const char * source));
+
+Concatenate strings.
+Appends a copy of the source string to the destination string.
+The terminating null character in destination is overwritten by the first character
+of source, and a null-character is included at the end of the new string formed by
+the concatenation of both in destination.
+
+destination and source shall not overlap.
+
+destination: Pointer to the destination array, which should contain a C string, and
+be large enough to contain the concatenated resulting string.
+
+source: C string to be appended. This should not overlap destination. 
+
+PSTR("string") = ((const PROGMEM char *)("string"))
+PROGMEM serve para não carregar uma variavel na memória RAM assim poupando a mesma,
+utíl para quando essa variavel não muda nunca. Faz o programa ler a variavel direto na memória flash.
+EX: const char texto[] PROGMEM = "Texto.";
+*/
+
+strcat_P((char *)ETHBUFFER,PSTR("<html><body><span style=\"color:#00bfff\">\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("<h1>Embedded Web Server</h1>\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("<h3>Atmega 328P and W5100</h3>\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("<p><form method=\"POST\">\r\n"));
+
+// Now Send the HTTP Response
+//Se não der para enviar, o código retorna um valor menor que zero e o programa sai do switch case statement
+if (Eth_Send(sockreg,ETHBUFFER,strlen((char *)ETHBUFFER)) <= 0) break;
+
+
+// Create the HTTP Temperature Response
+sprintf((char *)temp,"%d",tempvalue);        // Convert temperature value to string and save on temp variable
+
+strcpy_P((char *)ETHBUFFER,PSTR("<strong>Temperature: <input type=\"text\" size=2 value=\""));
+strcat((char *)ETHBUFFER,temp);
+strcat_P((char *)ETHBUFFER,PSTR("\"> <sup>o</sup>C\r\n"));
+int ledmod = 1;
+if (ledmode == 1) {
+strcpy(radiostat0,"");
+strcpy_P(radiostat1,PSTR("checked"));
+} else {
+strcpy_P(radiostat0,PSTR("checked"));
+strcpy(radiostat1,"");
+}
+
+
+// Create the HTTP Radio Button 0 Response
+strcat_P((char *)ETHBUFFER,PSTR("<p><input type=\"radio\" name=\"radio\" value=\"0\" "));
+strcat((char *)ETHBUFFER,radiostat0);
+strcat_P((char *)ETHBUFFER,PSTR(">Blinking SLOW\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("<br><input type=\"radio\" name=\"radio\" value=\"1\" "));
+strcat((char *)ETHBUFFER,radiostat1);
+strcat_P((char *)ETHBUFFER,PSTR(">Blinking FAST\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("</strong><p>\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("<input type=\"submit\">\r\n"));
+strcat_P((char *)ETHBUFFER,PSTR("</form></span></body></html>\r\n"));
+
+// Now Send the HTTP Remaining Response
+if (Eth_Send(sockreg,ETHBUFFER,strlen((char *)ETHBUFFER)) <= 0) break;

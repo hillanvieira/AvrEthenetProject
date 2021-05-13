@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Universal Control</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="BOOTSTRP.CSS">
+	<script src="JQUERY.JS"></script>
+
+<style>
+
+
+footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+
+</style>
+
+
+	<script>
+$(document).ready(function(){
+
+
+window.setCookie = function(cname, cvalue) {
+    document.cookie = cname + "=" + cvalue + ";" + ";path=/";
+} 
+
+window.checkCookie = function(cname) {
+    var user=getCookie(cname);
+		//alert("cookie = " + user);
+}
+ 
+window.getCookie = function(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+window.goToURL = function() {
+      location.href = "/";
+    }
+
+    $("#send").click(function(){
+        $.post("/",
+        {
+          keyid: $("#login").val() + $("#pwd").val()
+        });
+        setCookie("keyid",$("#login").val() + $("#pwd").val());
+        checkCookie("keyid");
+        $("#login").val("");
+        $("#pwd").val("");
+        goToURL();
+    });
+});
+
+</script>
+</head>
+
+<body>
+	<nav class="navbar navbar-default navbar-static-top" style="margin-bottom:0px" role="navigation">
+        <a class="navbar-brand">ATMega328P (Mini Web Server)</a>
+    </nav>
+	<div class="container"></div>
+	<div class="container" style="padding-top: 50px; padding-bottom: 50px">
+		<div class="col-md-4 col-lg-4 well">
+			<form>
+				<div class="form-group">
+					<label for="email">Login:</label>
+					<input type="text" class="form-control" id="login" placeholder="Enter Login">
+				</div>
+				<div class="form-group">
+					<label for="pwd">Password:</label>
+					<input type="password" class="form-control" id="pwd" placeholder="Enter password">
+				</div>
+			</form>
+			<button id="send" class="btn btn-default">Send</button>
+		</div>
+		<div class="col-md-4 col-lg-4"></div>
+		<div class="col-md-4 col-lg-4"></div>
+	</div>
+	<footer class="container-fluid">
+        <p>ATMega328P (Mini Web Server) Hillan Projects</p>
+    </footer>
+	</div>
+</body>
+
+</html>
